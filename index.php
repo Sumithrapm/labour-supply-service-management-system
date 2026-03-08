@@ -1,251 +1,119 @@
 <?php
 session_start();
 error_reporting(0);
-include('includes/dbconnection.php');
+include('../includes/dbconnection.php');
+
+if(isset($_POST['login'])) {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    
+    $sql = "SELECT ID, Password FROM tbluser WHERE Email=:email";
+    $query = $dbh->prepare($sql);
+    $query->bindParam(':email', $email, PDO::PARAM_STR);
+    $query->execute();
+    $result = $query->fetch(PDO::FETCH_OBJ);
+    
+    if($query->rowCount() > 0) {
+        if(password_verify($password, $result->Password)) {
+            $_SESSION['lssemsuid'] = $result->ID;
+            header('location:dashboard.php');
+        } else {
+            echo "<script>alert('Invalid email or password');</script>";
+        }
+    } else {
+        echo "<script>alert('Invalid email or password');</script>";
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LSSEMS - Labor Supply & Service Management System</title>
+    <title>User Login - LSSEMS</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .login-container {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        .login-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header h2 {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+        .login-header p {
+            color: #7f8c8d;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+        }
+        .btn-login:hover {
+            opacity: 0.9;
+        }
+    </style>
 </head>
 <body>
-    <?php include_once('includes/header.php');?>
-<!-- Hero Section with Auto-Sliding Images -->
-<section class="hero-section p-0">
-    <div class="container-fluid px-0">
-        <div class="row no-gutters align-items-center">
-
-            <!-- Left Content -->
-            <div class="col-md-6 p-5">
-                <h2 class="hero-title">Find Skilled Workers for Any Job @ Any Where</h2>
-                <p class="hero-subtitle">Connect with verified professionals for all your service needs</p>
-                
-                <div class="hero-buttons mt-4">
-                    <a href="category.php" class="btn btn-primary btn-lg mr-3 mb-2">
-                        <i class="fas fa-th-large mr-2"></i>Browse Categories
-                    </a>
-                    <a href="worker/register.php" class="btn btn-outline-primary btn-lg mb-2">
-                        <i class="fas fa-user-plus mr-2"></i>Register as Worker
-                    </a>
+    <div class="container">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <i class="fas fa-user fa-3x text-primary mb-3"></i>
+                    <h2>User Login</h2>
+                    <p>Access your account</p>
                 </div>
-            </div>
-
-            <!-- Right Carousel -->
-            <div class="col-md-6 px-0">
-                <div id="heroCarousel" class="carousel slide" data-ride="carousel" data-interval="2000">
-                    <div class="carousel-inner">
-                        <div class="carousel-item active">
-                            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1600&h=700&fit=crop" class="w-100" alt="Plumber">
-                        </div>
-                        <div class="carousel-item">
-                            <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600&h=700&fit=crop" class="w-100" alt="Electrician">
-                        </div>
-                        <div class="carousel-item">
-                            <img src="https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=1600&h=700&fit=crop" class="w-100" alt="Carpenter">
-                        </div>
-                        <div class="carousel-item">
-                            <img src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=1600&h=700&fit=crop" class="w-100" alt="Cleaning">
-                        </div>
-                        <div class="carousel-item">
-                            <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1600&h=700&fit=crop" class="w-100" alt="Construction">
+                <form method="post">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            </div>
+                            <input type="email" name="email" class="form-control" placeholder="Enter email" required>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            </div>
+                            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                        </div>
+                    </div>
+                    <button type="submit" name="login" class="btn btn-primary btn-block btn-login">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+                <div class="text-center mt-3">
+                    <p>Don't have an account? <a href="register.php">Register here</a></p>
+                    <a href="../index.php" class="text-muted"><i class="fas fa-arrow-left"></i> Back to Home</a>
                 </div>
             </div>
-
         </div>
     </div>
-</section>
-
-
-
-<!-- Search Section -->
-    <section class="search-section">
-        <div class="container">
-            <div class="search-box">
-                <form action="user/search-workers.php" method="POST">
-                    <div class="row">
-                        <div class="col-md-5">
-                            <input type="text" name="location" class="form-control form-control-lg" placeholder="Enter your location (optional)">
-                            <small class="form-text text-muted">Leave blank to search all locations</small>
-                        </div>
-                        <div class="col-md-5">
-                            <select name="categories" class="form-control form-control-lg" required>
-                                <option value="">Select Category</option>
-                                <?php 
-                                $sql = "SELECT * FROM tblcategory ORDER BY Category ASC";
-                                $query = $dbh->prepare($sql);
-                                $query->execute();
-                                $results = $query->fetchAll(PDO::FETCH_OBJ);
-                                if($query->rowCount() > 0) {
-                                    foreach($results as $row) { ?>
-                                        <option value="<?php echo htmlentities($row->Category); ?>">
-                                            <?php echo htmlentities($row->Category); ?>
-                                        </option>
-                                <?php }} ?>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" name="search" class="btn btn-primary btn-lg btn-block">
-                                <i class="fas fa-search"></i> Search
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </section>
-    <!-- Categories Section -->
-    <section class="categories-section py-5">
-        <div class="container">
-            <div class="section-title text-center mb-5">
-                <h2>Popular Categories</h2>
-                <p>Browse through our most requested service categories</p>
-            </div>
-            <div class="row">
-                <?php
-                $sql = "SELECT c.*, COUNT(w.ID) as worker_count 
-                        FROM tblcategory c 
-                        LEFT JOIN tblworker w ON c.Category = w.Category AND w.Status = 'Approved'
-                        GROUP BY c.ID 
-                        ORDER BY worker_count DESC 
-                        LIMIT 8";
-                $query = $dbh->prepare($sql);
-                $query->execute();
-                $results = $query->fetchAll(PDO::FETCH_OBJ);
-                
-                $icons = ['wrench', 'bolt', 'hammer', 'paint-brush', 'broom', 'leaf', 'car', 'utensils'];
-                $colors = ['primary', 'success', 'warning', 'danger', 'info', 'dark', 'secondary', 'purple'];
-                
-                if($query->rowCount() > 0) {
-                    $cnt = 0;
-                    foreach($results as $row) { ?>
-                        <div class="col-md-3 col-sm-6 mb-4">
-                            <div class="category-card text-center">
-                                <div class="category-icon bg-<?php echo $colors[$cnt % 8]; ?>">
-                                    <i class="fas fa-<?php echo $icons[$cnt % 8]; ?>"></i>
-                                </div>
-                                <h5><?php echo htmlentities($row->Category); ?></h5>
-                                <p class="text-muted"><?php echo htmlentities($row->worker_count); ?> Workers</p>
-                                <a href="user/search-workers.php?category=<?php echo urlencode($row->Category); ?>" class="btn btn-sm btn-outline-primary">View Workers</a>
-                            </div>
-                        </div>
-                <?php $cnt++; }} ?>
-            </div>
-            <div class="text-center mt-4">
-                <a href="category.php" class="btn btn-primary">View All Categories</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section class="how-it-works py-5 bg-light">
-        <div class="container">
-            <div class="section-title text-center mb-5">
-                <h2>How It Works</h2>
-                <p>Simple steps to get your work done</p>
-            </div>
-            <div class="row">
-                <div class="col-md-3 text-center">
-                    <div class="step-icon">
-                        <i class="fas fa-search fa-3x text-primary"></i>
-                    </div>
-                    <h5 class="mt-3">Search</h5>
-                    <p>Find workers by category and location</p>
-                </div>
-                <div class="col-md-3 text-center">
-                    <div class="step-icon">
-                        <i class="fas fa-user-check fa-3x text-success"></i>
-                    </div>
-                    <h5 class="mt-3">Choose</h5>
-                    <p>Select from verified professionals</p>
-                </div>
-                <div class="col-md-3 text-center">
-                    <div class="step-icon">
-                        <i class="fas fa-calendar-check fa-3x text-warning"></i>
-                    </div>
-                    <h5 class="mt-3">Book</h5>
-                    <p>Schedule your service appointment</p>
-                </div>
-                <div class="col-md-3 text-center">
-                    <div class="step-icon">
-                        <i class="fas fa-thumbs-up fa-3x text-info"></i>
-                    </div>
-                    <h5 class="mt-3">Get Done</h5>
-                    <p>Professional service delivery</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Statistics Section -->
-    <section class="stats-section py-5">
-        <div class="container">
-            <div class="row text-center">
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <i class="fas fa-users fa-3x mb-3 text-primary"></i>
-                        <?php
-                        $sql = "SELECT COUNT(*) as total FROM tblworker WHERE Status='Approved'";
-                        $query = $dbh->prepare($sql);
-                        $query->execute();
-                        $result = $query->fetch(PDO::FETCH_OBJ);
-                        ?>
-                        <h2><?php echo $result->total; ?>+</h2>
-                        <p>Verified Workers</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <i class="fas fa-briefcase fa-3x mb-3 text-success"></i>
-                        <?php
-                        $sql = "SELECT COUNT(*) as total FROM tblbooking WHERE Status='Completed'";
-                        $query = $dbh->prepare($sql);
-                        $query->execute();
-                        $result = $query->fetch(PDO::FETCH_OBJ);
-                        ?>
-                        <h2><?php echo $result->total; ?>+</h2>
-                        <p>Jobs Completed</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <i class="fas fa-smile fa-3x mb-3 text-warning"></i>
-                        <?php
-                        $sql = "SELECT COUNT(*) as total FROM tbluser";
-                        $query = $dbh->prepare($sql);
-                        $query->execute();
-                        $result = $query->fetch(PDO::FETCH_OBJ);
-                        ?>
-                        <h2><?php echo $result->total; ?>+</h2>
-                        <p>Happy Customers</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <i class="fas fa-star fa-3x mb-3 text-info"></i>
-                        <?php
-                        $sql = "SELECT AVG(Rating) as avg_rating FROM tblreview";
-                        $query = $dbh->prepare($sql);
-                        $query->execute();
-                        $result = $query->fetch(PDO::FETCH_OBJ);
-                        ?>
-                        <h2><?php echo number_format($result->avg_rating, 1); ?></h2>
-                        <p>Average Rating</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <?php include_once('includes/footer.php');?>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
